@@ -38,6 +38,10 @@ const downloadCourseVideos = async (page, saveDir, videoFormat, quality, playlis
             "-"
         );
 
+        if (title.includes("?")) {
+          title = title.replace("?", " ");
+        }
+
         if(title === prevVideoTitle) {
             console.log("\x1b[31m%s\x1b[0m", 'More videos not available - This course download aborted. \n Reason: Either you have no access to the following videos or videos have not yet been published. \n');
             break;
@@ -75,7 +79,14 @@ const downloadCourseVideos = async (page, saveDir, videoFormat, quality, playlis
 
         await page.goBack();
         await delay(5000);
-        await page.click('button[class="next"]')
+        try {
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click("div.list-item.active + div.list-item"),
+        ]);
+        } catch (error) {
+        console.log("Last lesson.\n\n");
+        }
     }
 }
 
